@@ -323,8 +323,8 @@ module.exports = {
     // Add custom types to COMMIT_TYPES in tools/project.env
     'type-enum': [2, 'always', [
 $(echo "$COMMIT_TYPES" | tr ',' '\n' | while read -r t; do
-  t=\$(echo "\$t" | xargs)
-  [[ -n "\$t" ]] && echo "      '\${t}',"
+  t=$(echo "$t" | xargs)
+  [[ -n "$t" ]] && echo "      '\${t}',"
 done)
     ]],
 
@@ -332,8 +332,8 @@ done)
     // Format in project.env: scope:description
     'scope-enum': [2, 'always', [
 $(echo "$COMMIT_SCOPES" | tr ',' '\n' | while read -r entry; do
-  SCOPE=\$(echo "\$entry" | cut -d: -f1 | xargs)
-  DESC=\$(echo "\$entry" | cut -d: -f2- | xargs)
+  SCOPE=$(echo "$entry" | cut -d: -f1 | xargs)
+  DESC=$(echo "$entry" | cut -d: -f2- | xargs)
   if [[ -n "\$SCOPE" ]]; then
     if [[ -n "\$DESC" && "\$DESC" != "\$SCOPE" ]]; then
       echo "      '\${SCOPE}', // \${DESC}"
@@ -728,7 +728,7 @@ jobs:
       - name: Check PR body contains ticket reference
         run: |
           body="\${{ github.event.pull_request.body }}"
-if echo "\$body" | grep -qiE "(${TICKET_KW_PAT}) #?${TICKET_ID_PATTERN}"; then
+	  if echo "\$body" | grep -qiE "(${TICKET_KW_PAT}) #?${TICKET_ID_PATTERN}"; then
             echo "Ticket reference found"
           else
             echo ""
