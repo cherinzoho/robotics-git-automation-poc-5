@@ -728,7 +728,7 @@ jobs:
       - name: Check PR body contains ticket reference
         run: |
           body="\${{ github.event.pull_request.body }}"
-	  if echo "\$body" | grep -qiE "(${TICKET_KW_PAT}) #?${TICKET_ID_PATTERN}"; then
+          if echo "\$body" | grep -qiE "(${TICKET_KW_PAT}) #?${TICKET_ID_PATTERN}"; then
             echo "Ticket reference found"
           else
             echo ""
