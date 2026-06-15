@@ -312,6 +312,27 @@ else
   # Build type list for the comment header in generated config
   TYPE_LIST=$(echo "$COMMIT_TYPES" | tr ',' ' ')
 
+  # Build JS array lines BEFORE the heredoc so variable expansion works.
+  # Inside a heredoc, subshell variables (from while-read loops) are not
+  # expanded — only the outer shell's variables are. Pre-building the
+  # strings here avoids that scoping problem entirely.
+  TYPE_ARRAY_JS=$(echo "$COMMIT_TYPES" | tr ',' '\n' | while read -r t; do
+    t=$(echo "$t" | xargs)
+    [[ -n "$t" ]] && echo "      '$t',"
+  done)
+
+  SCOPE_ARRAY_JS=$(echo "$COMMIT_SCOPES" | tr ',' '\n' | while read -r entry; do
+    SC=$(echo "$entry" | cut -d: -f1 | xargs)
+    DE=$(echo "$entry" | cut -d: -f2- | xargs)
+    if [[ -n "$SC" ]]; then
+      if [[ -n "$DE" && "$DE" != "$SC" ]]; then
+        echo "      '$SC', // $DE"
+      else
+        echo "      '$SC',"
+      fi
+    fi
+  done)
+
   cat > commitlint.config.js << EOF
 module.exports = {
   extends: ['@commitlint/config-conventional'],
@@ -322,26 +343,13 @@ module.exports = {
     // Allowed types: ${TYPE_LIST}
     // Add custom types to COMMIT_TYPES in tools/project.env
     'type-enum': [2, 'always', [
-$(echo "$COMMIT_TYPES" | tr ',' '\n' | while read -r t; do
-  t=$(echo "$t" | xargs)
-  [[ -n "$t" ]] && echo "      '\${t}',"
-done)
+${TYPE_ARRAY_JS}
     ]],
 
     // Allowed scopes — edit COMMIT_SCOPES in tools/project.env
     // Format in project.env: scope:description
     'scope-enum': [2, 'always', [
-$(echo "$COMMIT_SCOPES" | tr ',' '\n' | while read -r entry; do
-  SCOPE=$(echo "$entry" | cut -d: -f1 | xargs)
-  DESC=$(echo "$entry" | cut -d: -f2- | xargs)
-  if [[ -n "\$SCOPE" ]]; then
-    if [[ -n "\$DESC" && "\$DESC" != "\$SCOPE" ]]; then
-      echo "      '\${SCOPE}', // \${DESC}"
-    else
-      echo "      '\${SCOPE}',"
-    fi
-  fi
-done)
+${SCOPE_ARRAY_JS}
     ]],
 
     // Subject max ${COMMIT_SUBJECT_MAX_LENGTH} characters
