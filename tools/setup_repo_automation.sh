@@ -1024,8 +1024,10 @@ done
 
 # Live test: bad commit message must be rejected
 # Use exit code not string matching — more reliable across commitlint versions
+# IMPORTANT: capture exit code with ||true to prevent set -e from killing the
+# script when the hook correctly rejects the commit (non-zero exit is expected).
 info "Testing hooks — bad commit message must be REJECTED..."
-TEST_OUTPUT=$(git commit --allow-empty -m "${TEST_COMMIT_BAD:-fix stuff}" 2>&1)
+TEST_OUTPUT=$(git commit --allow-empty -m "${TEST_COMMIT_BAD:-fix stuff}" 2>&1) || true
 TEST_EXIT=$?
 if [[ $TEST_EXIT -ne 0 ]]; then
   pass "Hooks are active — bad commit message correctly rejected (exit $TEST_EXIT)"
