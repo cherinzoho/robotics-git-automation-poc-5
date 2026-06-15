@@ -256,7 +256,7 @@ fi
 
 echo ""
 info "Test 2: Valid commit message must PASS..."
-TEST2_OUTPUT=$(git commit --allow-empty -m "${TEST_COMMIT_GOOD:-chore(repo): verify automation hooks are active}" 2>&1)
+TEST2_OUTPUT=$(git commit --allow-empty -m "${TEST_COMMIT_GOOD:-chore(repo): verify automation hooks are active}" 2>&1) || true
 if echo "$TEST2_OUTPUT" | grep -qE "\[develop|develop\]|\[.*\].*feat"; then
   pass "Test 2 PASSED — valid commit accepted"
   # Clean up the test commit
